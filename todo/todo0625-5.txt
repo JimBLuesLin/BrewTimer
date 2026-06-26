@@ -1,0 +1,28 @@
+# 任务目标
+在「咖啡冲煮助手」配置页（`pages/index/index`）直接内嵌微信原生 `<video>` 组件，实现原生的视频播放体验，拒绝跨小程序跳转。
+
+# 修改范围
+`pages/index/index.ts`、`pages/index/index.wxml` 及 `pages/index/index.wxss`。
+
+# 核心需求
+
+## 1. 数据结构扩展 (TS)
+在 `index.ts` 中管理“大师配方预设”的数据结构里，为每位大师新增 `videoUrl` 和 `videoPoster` (封面图) 字段。
+请先使用以下合法的测试占位 URL（后续会替换为真实的云端地址）：
+- `videoUrl`: `'https://www.w3schools.com/html/mov_bbb.mp4'` (用于测试的开源 mp4)
+- `videoPoster`: 暂时留空。
+
+## 2. WXML 界面新增
+当用户选择了某位大师配方（且该配方的 `videoUrl` 不为空）时：
+- 在参数配置区的合适位置（建议在大师选择器下方），渲染一个微信原生 `<video>` 组件。
+- 动态绑定对应的 `src="{{currentPreset.videoUrl}}"` 和 `poster="{{currentPreset.videoPoster}}"`。
+- 配置基础属性：`object-fit="cover"`、`show-center-play-btn="{{true}}"`、`enable-play-gesture="{{true}}"`，确保移动端手势体验顺滑。
+
+## 3. WXSS 样式美化
+为 `<video>` 组件的外层包裹一个容器（如 `.video-container`），样式需严格契合当前小程序的咖啡色调 UI 设计规范：
+- 宽度设为 100%，高度根据 16:9 比例自适应（可使用 `aspect-ratio: 16 / 9;` 或固定高度约 `380rpx;`）。
+- 边距与圆角：`margin-top: 20rpx; border-radius: 16rpx; overflow: hidden;`。
+- 增加与整体卡片一致的柔和阴影，使其看起来像内嵌的精致播放器。
+- **层级防挡**：确保播放器渲染后，底部的“开始冲煮”悬浮按钮依然不会遮挡页面内容（维持底部的 `padding-bottom` 逻辑）。
+
+请输出完整的 WXML、TS 局部修改和新增的 WXSS 样式代码。

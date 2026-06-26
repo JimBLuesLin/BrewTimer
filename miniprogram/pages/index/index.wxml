@@ -1,0 +1,201 @@
+<!--index.wxml - 咖啡冲煮计时器-->
+
+<!-- ==================== 参数配置视图 ==================== -->
+<block wx:if="{{!isBrewing}}">
+  <scroll-view class="scrollarea" scroll-y>
+    <view class="config-container">
+
+      <!-- 标题 -->
+      <view class="header">
+        <text class="header-title">☕ 咖啡冲煮助手</text>
+        <text class="header-subtitle">设定参数，开始你的冲煮之旅</text>
+      </view>
+
+      <!-- 卡片0：大师配方预设 -->
+      <view class="card preset-card">
+        <view class="card-title">🏆 大师配方预设</view>
+        <view class="form-row">
+          <text class="form-label">配方选择</text>
+          <picker class="form-picker" mode="selector"
+            range="{{presets}}" value="{{presetIndex}}"
+            bindchange="onPresetChange">
+            <view class="picker-value">{{presets[presetIndex]}}</view>
+          </picker>
+        </view>
+        <view wx:if="{{presetIndex > 0}}" class="preset-lock-badge">
+          <text>🔒 水温、粉水比、注水分段已由大师配方锁定</text>
+        </view>
+        <view wx:if="{{presetIndex > 0}}" class="video-link" bindtap="openBilibiliVideo">
+          <text>🎥 观看大师原版教学视频</text>
+        </view>
+      </view>
+
+      <!-- 卡片1：冲煮参数 -->
+      <view class="card">
+        <view class="card-title">冲煮参数</view>
+
+        <!-- 冲煮方式 -->
+        <view class="form-row {{isPresetLocked ? 'form-row-locked' : ''}}">
+          <text class="form-label">{{isPresetLocked ? '🔒 ' : ''}}冲煮方式</text>
+          <picker class="form-picker" mode="selector"
+            range="{{methods}}" value="{{methodIndex}}"
+            bindchange="onMethodChange">
+            <view class="picker-value {{isPresetLocked ? 'picker-value-locked' : ''}}">{{methods[methodIndex]}}</view>
+          </picker>
+        </view>
+
+        <!-- 咖啡品种 -->
+        <view class="form-row">
+          <text class="form-label">咖啡品种</text>
+          <picker class="form-picker" mode="selector"
+            range="{{beans}}" value="{{beansIndex}}"
+            bindchange="onBeansChange">
+            <view class="picker-value">{{beans[beansIndex]}}</view>
+          </picker>
+        </view>
+
+        <!-- 烘焙程度 -->
+        <view class="form-row">
+          <text class="form-label">烘焙程度</text>
+          <picker class="form-picker" mode="selector"
+            range="{{roasts}}" value="{{roastIndex}}"
+            bindchange="onRoastChange">
+            <view class="picker-value">{{roasts[roastIndex]}}</view>
+          </picker>
+        </view>
+
+        <!-- 研磨度 -->
+        <view class="form-row {{isPresetLocked ? 'form-row-locked' : ''}}">
+          <text class="form-label">{{isPresetLocked ? '🔒 ' : ''}}研磨度</text>
+          <picker class="form-picker" mode="selector"
+            range="{{grinds}}" value="{{grindIndex}}"
+            bindchange="onGrindChange">
+            <view class="picker-value {{isPresetLocked ? 'picker-value-locked' : ''}}">{{grinds[grindIndex]}}</view>
+          </picker>
+        </view>
+
+        <!-- 咖啡粉量 -->
+        <view class="form-row">
+          <text class="form-label">咖啡粉量</text>
+          <picker class="form-picker" mode="selector"
+            range="{{weightOptions}}" value="{{weightIndex}}"
+            bindchange="onWeightChange">
+            <view class="picker-value">{{weight}}g</view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- 卡片2：自动计算结果 -->
+      <view class="card result-card">
+        <view class="card-title">冲煮参数（自动计算）</view>
+
+        <view class="result-grid">
+          <view class="result-item">
+            <text class="result-label">水温</text>
+            <text class="result-value">{{temperature}}°C</text>
+          </view>
+          <view class="result-item">
+            <text class="result-label">粉水比</text>
+            <text class="result-value">1:{{ratio}}</text>
+          </view>
+          <view class="result-item result-item-full">
+            <text class="result-label">总水量</text>
+            <text class="result-value result-value-large">{{totalWater}}g</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 深烘预警 -->
+      <view wx:if="{{showRoastWarning}}" class="roast-warning">
+        <text>⚠️ 提示：该大师手法追求高萃取率，搭配深烘豆极易产生焦苦味，建议使用浅/中烘焙咖啡豆。</text>
+      </view>
+
+      <!-- 卡片3：注水手法（仅自定义参数时显示） -->
+      <view wx:if="{{presetIndex === 0}}" class="card">
+        <view class="card-title">注水手法</view>
+        <view class="form-row">
+          <text class="form-label">手法选择</text>
+          <picker class="form-picker" mode="selector"
+            range="{{pourStyles}}" value="{{pourStyleIndex}}"
+            bindchange="onPourStyleChange">
+            <view class="picker-value">{{pourStyles[pourStyleIndex]}}</view>
+          </picker>
+        </view>
+
+        <!-- 阶段预览 -->
+        <view class="stage-preview">
+          <view class="stage-preview-title">阶段预览</view>
+          <view wx:for="{{stages}}" wx:key="index" class="stage-preview-item">
+            <view class="stage-dot"></view>
+            <text class="stage-preview-text">
+              {{item.name}}：{{item.hint}}（目标 {{item.targetWater}}g）
+            </text>
+          </view>
+        </view>
+      </view>
+
+    </view>
+  </scroll-view>
+
+  <!-- 底部固定悬浮按钮 -->
+  <view class="action-footer">
+    <button class="btn-start" bindtap="startBrewing">
+      <text class="btn-start-icon">▶</text>
+      <text>开始冲煮</text>
+    </button>
+  </view>
+</block>
+
+<!-- ==================== 冲煮计时视图 ==================== -->
+<view wx:if="{{isBrewing}}" class="brew-container">
+
+  <!-- 计时器 -->
+  <view class="timer-section">
+    <text class="timer-label">冲煮时间</text>
+    <text class="timer-display">{{timerDisplay}}</text>
+  </view>
+
+  <!-- 当前阶段卡片 -->
+  <view class="card stage-card">
+    <view class="stage-badge">当前阶段</view>
+    <text class="stage-name">{{currentStageName}}</text>
+
+    <view class="stage-info-row">
+      <view class="stage-info-item">
+        <text class="stage-info-label">时间范围</text>
+        <text class="stage-info-value">{{currentStageTimeRange}}</text>
+      </view>
+    </view>
+
+    <view class="target-water-area">
+      <text class="target-water-label">目标注水量</text>
+      <text class="target-water-value">{{currentStageTarget}}</text>
+      <text class="target-water-unit">g</text>
+    </view>
+
+    <view class="stage-hint">
+      <text class="stage-hint-icon">💡</text>
+      <text class="stage-hint-text">{{currentStageHint}}</text>
+    </view>
+  </view>
+
+  <!-- 所有阶段概览 -->
+  <view class="card stages-overview">
+    <view class="card-title">阶段概览</view>
+    <view wx:for="{{stages}}" wx:key="index" class="overview-item {{currentStageName === item.name ? 'overview-active' : ''}}">
+      <view class="overview-dot {{currentStageName === item.name ? 'dot-active' : ''}}"></view>
+      <view class="overview-info">
+        <text class="overview-name">{{item.name}}</text>
+        <text class="overview-detail">{{item.hint}} · {{item.targetWater}}g</text>
+      </view>
+      <text class="overview-time">{{item.endSeconds >= 999999999 ? '→' : ''}}</text>
+    </view>
+  </view>
+
+  <!-- 结束按钮 -->
+  <view class="action-area">
+    <button class="btn-end" bindtap="endBrewing">
+      <text>结束冲煮</text>
+    </button>
+  </view>
+</view>

@@ -1,0 +1,7 @@
+/**app.wxss**/
+page {
+  background-color: #FAF7F2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', sans-serif;
+  color: #3E2723;
+  font-size: 28rpx;
+}

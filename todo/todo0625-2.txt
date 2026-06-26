@@ -1,0 +1,25 @@
+# 任务目标
+优化「咖啡冲煮助手」小程序的首页（`pages/index/index`）布局。当前参数配置视图（`isBrewing === false` 时）的内容较长，导致底部的「开始冲煮」按钮被挤压到屏幕视口之外。请采用“底部固定悬浮按钮”的方案进行 UI 重构。
+
+# 修改范围
+仅修改 `pages/index/index.wxml` 和 `pages/index/index.wxss`，不需要修改业务逻辑 `.ts` 文件。
+
+# 核心要求
+1. **WXML 结构调整**：
+   - 将“开始冲煮”按钮（及其容器）从现有的滚动流中提取出来。
+   - 使用一个新的 `<view class="action-footer">` 容器包裹该按钮，并将其放置在页面的最外层（但受 `wx:if="{{!isBrewing}}"` 控制）。
+
+2. **WXSS 样式调整**：
+   - **滚动区防遮挡**：为原本包裹参数列表的外层容器（如 `.config-section` 或 `scroll-view`）增加 `padding-bottom: 180rpx;`，确保滑到最底部时，最后一个参数卡片不会被悬浮按钮遮挡。
+   - **底部悬浮容器 (`.action-footer`)**：
+     - 使用 `position: fixed; bottom: 0; left: 0; width: 100%;` 固定在底部。
+     - 设置背景色为从透明到奶油白 (`#FAF7F2`) 的向上线性渐变底板，以提供平滑的视觉过渡效果并保证底层内容可读。
+     - 设置合适的内边距，必须包含 `padding-bottom: calc(30rpx + env(safe-area-inset-bottom));` 以完美适配全面屏/刘海屏底部的安全距离。
+     - 设置较高的 `z-index` 确保在最上层。
+   - **主操作按钮 (`.btn-start`)**：
+     - 宽度撑满父容器（覆盖小程序默认按钮的宽度）。
+     - 高度设置为 `96rpx`，圆角设为 `48rpx`（胶囊形状）。
+     - 背景色严格使用系统主色调 `#6F4E37`，文字颜色使用 `#F5F5DC`。
+     - 添加柔和的底部阴影（`box-shadow: 0 8rpx 16rpx rgba(111, 78, 55, 0.3);`）增加立体感和点击欲。
+
+请输出修改后的完整 WXML 和 WXSS 对应部分代码。

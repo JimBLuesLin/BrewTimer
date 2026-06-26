@@ -1,0 +1,8 @@
+message：真机调试 Error: 非法的文件，错误信息：invalid file: pages/index/index.js, 108:40
+SyntaxError: Unexpected token ?
+        const newGrind = grindMap[idx] ?? 0; [20260625 10:30:33][wx133f61b555aaf76a]
+appid: wx133f61b555aaf76a
+openid: o6zAJsyiZ0evKjh0rBBlZFnMHt0M
+ideVersion: 2.01.2510290
+osType: win32-x64
+time: 2026-06-25 10:30:44
